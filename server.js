@@ -10,7 +10,7 @@ const app = express();
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-2.5-flash",
   generationConfig: {
     temperature: 1.2, // 더 창의적인 응답을 위해 높게 설정
     maxOutputTokens: 300,
@@ -49,10 +49,10 @@ app.post("/api/fortune", async (req, res) => {
 - 2-3문장으로 간결하게
 - 이모지 적절히 활용
 - 긍정적이면서도 현실적인 톤
-- 반말 사용, 조금 재밌게 킹받아도 됨 (친근한 톤)
+- 반말 사용 (친근한 톤)
 
 예시 스타일:
-"팀플이 카오스가 될 예정?!?! 🌪️ 하지만 다르게 생각해보면, 각자의 다양성이 도움이 될지도~🌈"
+"팀플이 카오스가 될 예정?!?! 🌪️ 하지만 다르게 생각해보면, 각자의 다양성이 도움이 될지도 모르는 법~🌈"
 
 JSON 형식으로만 답변해줘:
 {
@@ -63,13 +63,30 @@ JSON 형식으로만 답변해줘:
     const response = result.response;
     const text = response.text();
 
+    console.log(`📝 원본 응답: ${text.substring(0, 100)}...`);
+
     // Remove markdown code blocks if present
     const cleanText = text
       .replace(/```json\n?/g, "")
       .replace(/```\n?/g, "")
       .trim();
 
-    const parsed = JSON.parse(cleanText);
+    console.log(`🧹 정제된 응답: ${cleanText.substring(0, 100)}...`);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanText);
+    } catch (jsonError) {
+      console.error("❌ JSON 파싱 실패:", cleanText);
+      // JSON 파싱 실패 시 텍스트에서 fortune 추출 시도
+      const fortuneMatch = cleanText.match(/"fortune"\s*:\s*"([^"]+)"/);
+      if (fortuneMatch) {
+        parsed = { fortune: fortuneMatch[1] };
+        console.log("✅ 수동 파싱 성공");
+      } else {
+        throw new Error("JSON 파싱 실패 및 fortune 추출 불가");
+      }
+    }
 
     if (!parsed.fortune) {
       throw new Error("Invalid response structure");
