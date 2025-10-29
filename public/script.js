@@ -221,13 +221,21 @@ async function displayResults(results) {
   resultDiv.classList.remove("hidden");
 
   // Gemini API로 운세 생성
-  // const fortune = "dummy";
   const fortune = await generateFortune(results[0], results[1], results[2]);
   fortuneText.textContent = fortune;
 
   isSpinning = false;
+
+  spinButton.classList.add("reactivating");
   spinButton.disabled = false;
-  spinButton.textContent = "운세 뽑기 🎲";
+
+  const buttonImage = spinButton.querySelector(".button-image");
+  buttonImage.src = "images/button.png";
+
+  // 애니메이션 끝나면 클래스 제거
+  setTimeout(() => {
+    spinButton.classList.remove("reactivating");
+  }, 500);
 }
 
 // 페이지 로드 시 슬롯 초기화
@@ -243,7 +251,7 @@ spinButton.addEventListener("click", async () => {
 
   isSpinning = true;
   spinButton.disabled = true;
-  spinButton.textContent = "돌리는 중...";
+
   resultDiv.classList.add("hidden");
 
   console.log("스핀 시작!");
@@ -257,6 +265,8 @@ spinButton.addEventListener("click", async () => {
     completedCount++;
     console.log(`완료된 슬롯: ${completedCount}/3`);
     if (completedCount === 3) {
+      const buttonImage = spinButton.querySelector(".button-image");
+      buttonImage.src = "images/button-brown.png";
       console.log("모든 슬롯 완료!");
       setTimeout(() => {
         displayResults(results);
