@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>학업 운세 슬롯머신 🎰</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎰 학업 운세 슬롯머신</h1>
+        <p class="subtitle">당신의 학기 운세를 확인해보세요!</p>
+      </header>
+
+      <div class="slot-machine">
+        <div class="slots-container">
+          <div class="slot" id="slot1">
+            <div class="slot-inner">
+              <div class="slot-item">전공</div>
+            </div>
+          </div>
+          <div class="slot" id="slot2">
+            <div class="slot-inner">
+              <div class="slot-item">🍯꿀</div>
+            </div>
+          </div>
+          <div class="slot" id="slot3">
+            <div class="slot-inner">
+              <div class="slot-item">🍕피자</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="spinButton" class="spin-button">운세 뽑기 🎲</button>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="result-content">
+          <h2 class="result-title">당신의 운세</h2>
+          <div class="result-combination">
+            <span id="resultSlot1"></span>
+            <span class="separator">×</span>
+            <span id="resultSlot2"></span>
+            <span class="separator">×</span>
+            <span id="resultSlot3"></span>
+          </div>
+          <p id="fortuneText" class="fortune-text"></p>
+          <button id="resetButton" class="reset-button">다시 뽑기</button>
+        </div>
+      </div>
+
+      <footer>
+        <p>💬 수업 개선 의견을 남겨주세요!</p>
+        <p class="footer-note">교육위원회 학사수업개선 사업</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

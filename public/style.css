@@ -1,0 +1,307 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR",
+    sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+.slot-machine {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.slots-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.slot {
+  width: 120px;
+  height: 160px;
+  background: #f8f9fa;
+  border: 3px solid #e9ecef;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slot-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+}
+
+.slot-item {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  padding: 10px;
+  word-break: keep-all;
+}
+
+.slot.spinning .slot-inner {
+  animation: spin 0.1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(3px) rotate(1deg);
+  }
+}
+
+.slot.shaking {
+  animation: shake 0.5s ease-in-out;
+}
+
+.spin-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 18px 48px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.spin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.spin-button:active {
+  transform: translateY(0);
+}
+
+.spin-button:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.result {
+  background: #f8f9fa;
+  padding: 40px 20px;
+  border-top: 2px solid #e9ecef;
+  animation: slideIn 0.5s ease;
+}
+
+.result.hidden {
+  display: none;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-content {
+  text-align: center;
+}
+
+.result-title {
+  font-size: 1.5rem;
+  color: #495057;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.result-combination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #667eea;
+  flex-wrap: wrap;
+}
+
+.separator {
+  color: #adb5bd;
+  font-size: 1rem;
+}
+
+.fortune-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #212529;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.reset-button {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 14px 36px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+footer {
+  background: #343a40;
+  color: white;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+footer p {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.footer-note {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .slots-container {
+    gap: 10px;
+  }
+
+  .slot {
+    width: 90px;
+    height: 130px;
+  }
+
+  .slot-item {
+    font-size: 1.125rem;
+    padding: 5px;
+  }
+
+  .spin-button {
+    padding: 14px 32px;
+    font-size: 1rem;
+  }
+
+  .result-title {
+    font-size: 1.25rem;
+  }
+
+  .result-combination {
+    font-size: 1rem;
+  }
+
+  .fortune-text {
+    font-size: 1rem;
+    padding: 15px;
+  }
+
+  .reset-button {
+    padding: 12px 28px;
+    font-size: 1rem;
+  }
+}
+
+/* 태블릿 반응형 */
+@media (min-width: 481px) and (max-width: 768px) {
+  .slot {
+    width: 110px;
+    height: 150px;
+  }
+
+  .slot-item {
+    font-size: 1.375rem;
+  }
+}
