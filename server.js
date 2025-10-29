@@ -10,10 +10,13 @@ const app = express();
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash",
   generationConfig: {
     temperature: 1.2, // 더 창의적인 응답을 위해 높게 설정
-    maxOutputTokens: 300,
+    maxOutputTokens: 500,
+  },
+  thinkingConfig: {
+    thinkingBudget: 0, // Disables thinking
   },
 });
 
@@ -44,7 +47,6 @@ app.post("/api/fortune", async (req, res) => {
 위 3가지 조합을 바탕으로 대학생의 학업 운세를 재밌고 공감가게 해석해주세요.
 
 해석 가이드라인:
-- 뽑힌 조합에 최대한 부합하는 창의적인 운세 풀이
 - 대학생들이 공감할 수 있는 현실적이고 유머러스한 내용
 - 2-3문장으로 간결하게
 - 이모지 적절히 활용
@@ -61,9 +63,14 @@ JSON 형식으로만 답변해줘:
 
     const result = await model.generateContent(prompt);
     const response = result.response;
+
+    // 전체 응답 구조 확인
+    console.log(`📦 전체 응답 객체:`, JSON.stringify(response, null, 2));
+
     const text = response.text();
 
-    console.log(`📝 원본 응답: ${text.substring(0, 100)}...`);
+    console.log(`📝 원본 응답 (전체): "${text}"`);
+    console.log(`📏 응답 길이: ${text.length}자`);
 
     // Remove markdown code blocks if present
     const cleanText = text
@@ -71,20 +78,27 @@ JSON 형식으로만 답변해줘:
       .replace(/```\n?/g, "")
       .trim();
 
-    console.log(`🧹 정제된 응답: ${cleanText.substring(0, 100)}...`);
+    console.log(`🧹 정제된 응답 (전체): "${cleanText}"`);
 
     let parsed;
     try {
       parsed = JSON.parse(cleanText);
     } catch (jsonError) {
-      console.error("❌ JSON 파싱 실패:", cleanText);
+      console.error("❌ JSON 파싱 실패. 원본 텍스트:");
+      console.error(cleanText);
       // JSON 파싱 실패 시 텍스트에서 fortune 추출 시도
       const fortuneMatch = cleanText.match(/"fortune"\s*:\s*"([^"]+)"/);
       if (fortuneMatch) {
         parsed = { fortune: fortuneMatch[1] };
         console.log("✅ 수동 파싱 성공");
       } else {
-        throw new Error("JSON 파싱 실패 및 fortune 추출 불가");
+        // 마지막 시도: 그냥 텍스트를 fortune으로 사용
+        if (cleanText.length > 0) {
+          console.log("⚠️ JSON 형식이 아니므로 텍스트 자체를 사용");
+          parsed = { fortune: cleanText };
+        } else {
+          throw new Error("JSON 파싱 실패 및 fortune 추출 불가");
+        }
       }
     }
 
