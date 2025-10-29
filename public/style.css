@@ -270,7 +270,7 @@ header h1 {
 /* 호버 효과 */
 .spin-button:hover .button-image {
   filter: drop-shadow(0 6px 10px rgba(138, 43, 226, 0.6))
-    drop-shadow(0 0 10px rgba(212, 175, 55, 0.4)) brightness(1);
+    drop-shadow(0 0 10px rgba(212, 175, 55, 0.4)) brightness(1.2);
   transform: scale(1.05);
 }
 
