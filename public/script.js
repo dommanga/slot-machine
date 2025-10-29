@@ -79,8 +79,139 @@ const slots = [
 
 let isSpinning = false;
 
+// 슬롯 릴 초기화
+function initializeSlot(slotElement, items) {
+  const reel = slotElement.querySelector(".slot-reel");
+  const itemHeight = slotElement.offsetHeight;
+  reel.innerHTML = "";
+
+  // 초기 아이템만 표시
+  const item = document.createElement("div");
+  item.className = "slot-item";
+  item.style.height = `${itemHeight}px`; // 동적으로 높이 설정!
+  item.textContent = items[0];
+  reel.appendChild(item);
+
+  reel.style.transform = "translateY(0)";
+  reel.style.transition = "none";
+}
+
+// 랜덤 아이템 선택
+function getRandomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+// 슬롯 애니메이션 (무한 루프 - 단순화 버전)
+function animateSlot(slotElement, items) {
+  return new Promise((resolve) => {
+    const reel = slotElement.querySelector(".slot-reel");
+    const itemHeight = slotElement.offsetHeight;
+
+    console.log(`슬롯 높이: ${itemHeight}px, 아이템 개수: ${items.length}`);
+
+    // 최종 결과 선택
+    const finalItem = getRandomItem(items);
+    const finalIndex = items.indexOf(finalItem);
+
+    console.log(`최종 선택: ${finalItem} (인덱스: ${finalIndex})`);
+
+    // 릴 초기화 - 충분히 많이 반복 (20번)
+    reel.innerHTML = "";
+    const totalRepeats = 20;
+    for (let cycle = 0; cycle < totalRepeats; cycle++) {
+      items.forEach((itemText, idx) => {
+        const div = document.createElement("div");
+        div.className = "slot-item";
+        div.style.height = `${itemHeight}px`;
+        div.textContent = itemText;
+        div.dataset.cycle = cycle;
+        div.dataset.index = idx;
+        reel.appendChild(div);
+      });
+    }
+
+    const cycleLength = items.length * itemHeight;
+    console.log(
+      `한 사이클 길이: ${cycleLength}px (${items.length}개 × ${itemHeight}px)`
+    );
+
+    // 초기 위치
+    reel.style.transition = "none";
+    reel.style.transform = "translateY(0)";
+    reel.offsetHeight;
+
+    let currentCycle = 0;
+    const fastCycles = 6; // 빠르게 6바퀴
+
+    // 빠른 스핀 함수
+    const spinCycle = () => {
+      if (currentCycle < fastCycles) {
+        const speed = currentCycle < 2 ? 0.3 : 0.15;
+        reel.style.transition = `transform ${speed}s linear`;
+        reel.style.transform = `translateY(-${cycleLength}px)`;
+
+        setTimeout(() => {
+          reel.style.transition = "none";
+          reel.style.transform = "translateY(0)";
+          reel.offsetHeight;
+
+          currentCycle++;
+          spinCycle();
+        }, speed * 1000);
+      } else {
+        // 감속하면서 최종 위치로
+        // 한 바퀴 더 + 최종 아이템 위치
+        const offset = 75;
+        const finalPosition = cycleLength + finalIndex * itemHeight + offset;
+
+        console.log(
+          `감속 시작 → 최종 위치: ${cycleLength} + ${
+            finalIndex * itemHeight
+          } = ${finalPosition}px`
+        );
+
+        reel.style.transition =
+          "transform 2.5s cubic-bezier(0.17, 0.67, 0.12, 0.99)";
+        reel.style.transform = `translateY(-${finalPosition}px)`;
+
+        setTimeout(() => {
+          // 정확히 어떤 아이템이 화면 중앙에 있는지 계산
+          // translateY(-finalPosition) 이므로 화면에는 finalPosition만큼 이동한 위치
+          const visibleIndex = Math.round(finalPosition / itemHeight);
+          const visibleItem = reel.children[visibleIndex];
+
+          console.log(`멈춘 위치 인덱스: ${visibleIndex}`);
+          console.log(
+            `화면 중앙 아이템: ${
+              visibleItem ? visibleItem.textContent : "없음"
+            }`
+          );
+          console.log(`선택된 아이템: ${finalItem}`);
+          console.log(
+            `일치 여부: ${
+              visibleItem && visibleItem.textContent === finalItem ? "✅" : "❌"
+            }`
+          );
+
+          slotElement.classList.add("shaking");
+          setTimeout(() => {
+            slotElement.classList.remove("shaking");
+            resolve(finalItem);
+          }, 500);
+        }, 2500);
+      }
+    };
+
+    setTimeout(() => {
+      spinCycle();
+    }, 50);
+  });
+}
+
 // 결과 표시 함수
 async function displayResults(results) {
+  console.log("결과 표시:", results);
+
   // 결과 표시
   document.getElementById("resultSlot1").textContent = results[0];
   document.getElementById("resultSlot2").textContent = results[1];
@@ -91,6 +222,7 @@ async function displayResults(results) {
   resultDiv.classList.remove("hidden");
 
   // Gemini API로 운세 생성
+  // const fortune = "dummy";
   const fortune = await generateFortune(results[0], results[1], results[2]);
   fortuneText.textContent = fortune;
 
@@ -99,67 +231,12 @@ async function displayResults(results) {
   spinButton.textContent = "운세 뽑기 🎲";
 }
 
-// 랜덤 아이템 선택
-function getRandomItem(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-// Easing 함수 (느리게 시작 → 빠르게 → 느리게 끝)
-function easeInOutQuad(t) {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-}
-
-// 슬롯 애니메이션 (가속/감속 + 흔들림 효과)
-function animateSlot(slotElement, items, duration) {
-  return new Promise((resolve) => {
-    const slotInner = slotElement.querySelector(".slot-inner");
-    const slotItem = slotElement.querySelector(".slot-item");
-
-    slotElement.classList.add("spinning");
-
-    const startTime = Date.now();
-    let lastUpdateTime = startTime;
-    const minInterval = 30; // 최소 간격 (빠를 때)
-    const maxInterval = 200; // 최대 간격 (느릴 때)
-
-    const animate = () => {
-      const now = Date.now();
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Easing 적용: 0에서 1로 부드럽게 변화
-      const easedProgress = easeInOutQuad(progress);
-
-      // 진행도에 따라 간격 조절 (처음/끝은 느리게, 중간은 빠르게)
-      const currentInterval =
-        maxInterval -
-        (maxInterval - minInterval) * Math.sin(easedProgress * Math.PI);
-
-      if (now - lastUpdateTime >= currentInterval) {
-        slotItem.textContent = getRandomItem(items);
-        lastUpdateTime = now;
-      }
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // 애니메이션 종료
-        slotElement.classList.remove("spinning");
-        const finalItem = getRandomItem(items);
-        slotItem.textContent = finalItem;
-
-        // 흔들림 효과
-        slotElement.classList.add("shaking");
-        setTimeout(() => {
-          slotElement.classList.remove("shaking");
-          resolve(finalItem);
-        }, 500); // 0.5초 흔들림
-      }
-    };
-
-    requestAnimationFrame(animate);
-  });
-}
+// 페이지 로드 시 슬롯 초기화
+document.addEventListener("DOMContentLoaded", () => {
+  initializeSlot(slots[0], categories.category1);
+  initializeSlot(slots[1], categories.category2);
+  initializeSlot(slots[2], categories.category3);
+});
 
 // 스핀 버튼 클릭
 spinButton.addEventListener("click", async () => {
@@ -170,27 +247,40 @@ spinButton.addEventListener("click", async () => {
   spinButton.textContent = "돌리는 중...";
   resultDiv.classList.add("hidden");
 
-  // 각 슬롯을 순차적으로 시작 (0.3초 간격)
-  const results = [];
+  console.log("스핀 시작!");
 
-  // 첫 번째 슬롯
+  // 결과 저장용 배열
+  const results = [null, null, null];
+  let completedCount = 0;
+
+  // 완료 체크 함수
+  const checkComplete = () => {
+    completedCount++;
+    console.log(`완료된 슬롯: ${completedCount}/3`);
+    if (completedCount === 3) {
+      console.log("모든 슬롯 완료!");
+      setTimeout(() => {
+        displayResults(results);
+      }, 600);
+    }
+  };
+
+  // 첫 번째 슬롯 (즉시 시작)
   setTimeout(async () => {
-    results[0] = await animateSlot(slots[0], categories.category1, 2000);
+    results[0] = await animateSlot(slots[0], categories.category1);
+    checkComplete();
   }, 0);
 
   // 두 번째 슬롯 (0.3초 후 시작)
   setTimeout(async () => {
-    results[1] = await animateSlot(slots[1], categories.category2, 2000);
+    results[1] = await animateSlot(slots[1], categories.category2);
+    checkComplete();
   }, 300);
 
   // 세 번째 슬롯 (0.6초 후 시작)
   setTimeout(async () => {
-    results[2] = await animateSlot(slots[2], categories.category3, 2000);
-
-    // 모든 슬롯이 멈춘 후 결과 표시
-    setTimeout(() => {
-      displayResults(results);
-    }, 600); // 흔들림 효과 끝난 후
+    results[2] = await animateSlot(slots[2], categories.category3);
+    checkComplete();
   }, 600);
 });
 
@@ -199,7 +289,7 @@ resetButton.addEventListener("click", () => {
   resultDiv.classList.add("hidden");
 
   // 슬롯 초기화
-  slots[0].querySelector(".slot-item").textContent = "전공";
-  slots[1].querySelector(".slot-item").textContent = "🍯꿀";
-  slots[2].querySelector(".slot-item").textContent = "🍕피자";
+  initializeSlot(slots[0], categories.category1);
+  initializeSlot(slots[1], categories.category2);
+  initializeSlot(slots[2], categories.category3);
 });
