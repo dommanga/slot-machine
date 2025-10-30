@@ -193,7 +193,7 @@ http://localhost:3000
 ## 💡 사용 방법
 
 1. **메인 화면**: 3개의 슬롯 릴과 중앙의 버튼이 보입니다.
-   ![alt text](images/initial.png)
+   ![alt text](public/images/initial.png)
 
 2. **운세 뽑기 버튼 클릭**: 중앙의 버튼을 클릭하면 슬롯이 회전합니다.
 
@@ -201,7 +201,7 @@ http://localhost:3000
 
    - 모든 슬롯이 정지하면 "AI가 운세를 분석하고 있어요..." 메시지 표시
    - Gemini API가 3개 조합을 분석하여 운세 생성
-     ![alt text](images/answer.png)
+     ![alt text](public/images/answer.png)
 
 4. **결과 확인**:
 
